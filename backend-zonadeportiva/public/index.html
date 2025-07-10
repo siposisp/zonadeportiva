@@ -1,0 +1,44 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Webpay</title>
+</head>
+<body>
+  <h1>Iniciar pago con Webpay</h1>
+  <form id="form-pago">
+    <input type="hidden" id="buyOrder" value="10195" />
+    <input type="hidden" id="amount"   value="9690" />
+    <input type="hidden" id="returnUrl" value="http://localhost:3000/webpay/return" />
+    <button type="submit">Pagar $10</button>
+  </form>
+
+  <script>
+    document.getElementById("form-pago").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const buyOrder  = document.getElementById("buyOrder").value;
+      const amount    = document.getElementById("amount").value;
+      const returnUrl = document.getElementById("returnUrl").value;
+
+      // IMPORTANTE: incluir credenciales (cookie) para optionalAuth
+      const res = await fetch("http://localhost:3000/webpay/create", {
+        method: "POST",
+        credentials: "include",            // <— aquí
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ buyOrder, amount, returnUrl })
+      });
+
+      if (!res.ok) {
+        console.error("Error al crear transacción", await res.text());
+        return;
+      }
+
+      const data = await res.json();
+      // rediriges a Webpay con el token que te devolvió el servidor
+      window.location.href = `${data.url}?token_ws=${data.token}`;
+    });
+  </script>
+</body>
+</html>

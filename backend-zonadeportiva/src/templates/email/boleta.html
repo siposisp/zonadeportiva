@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Boleta de Compra</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      background-color: #f3f3f3;
+    }
+
+    .email-container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin: 40px auto;
+    }
+
+    .header {
+      background-color: #e10073;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .content p {
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .table-container {
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table th,
+    table td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    table th {
+      background-color: #f8f8f8;
+    }
+
+    .summary {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    .footer {
+      font-size: 0.9em;
+      color: #777;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .footer p {
+      margin: 0;
+      padding: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>Gracias por tu compra</h1>
+    </div>
+
+    <div class="content">
+      <p>Hola <strong>{{nombre}}</strong>,</p>
+      <p>Te adjuntamos la boleta correspondiente a tu compra realizada el día <strong>{{fecha}}</strong>.</p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{itemList}}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="summary">Subtotal: ${{subtotal}}</p>
+      <p class="summary">Envío: ${{shipping}}</p>
+      <p class="summary">Total: ${{total}}</p>
+
+      <div class="footer">
+        <p>Gracias por confiar en <strong>{{appName}}</strong>.</p>
+        <p>Este es un correo automático. Por favor no respondas.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

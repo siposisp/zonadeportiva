@@ -1,0 +1,150 @@
+Zona Deportiva
+Propuesta de MR
+
+[ products ]
+
+product_id 	       [PK] → ID producto
+parent_id	  [FK/NULL] →
+title				    → Nombre del producto
+description		        → Descripción larga
+short-desc			    → Descripción corta
+status			        → Estado de la publicación
+created_at			    → Fecha de creación
+updated_at			    → Fecha de última modificación
+length         		    → Largo (cm)
+width        		    → Ancho (cm)
+height          		→ Alto (cm)
+weight              	→ Peso (kg)
+brand_id           [FK] → Marca
+slug				    → URL amigable
+product_type        	→ simple / variable / grouped / external
+
+[ product_meta ]
+
+product_id	    [PK/FK] → Relación con products
+sku 				    → SKU
+price				    → Precio actual
+regular_price 		    → Precio normal
+sale_price 		        → Precio en oferta
+sale_start 		        → Inicio oferta
+sale_end 			    → Fin oferta
+stock				    → Stock disponible
+stock_status 		    → instock / outofstock
+visibility 		        → Visibilidad en catálogo
+keywords			    → Palabras claves
+
+[ brand ]
+
+brand_id			    → ID marca
+name				    → Nombre de la marca
+
+[ categories ]
+
+category_id 	   [PK] → ID categoría
+name 				    → Nombre de la categoría
+parent_id		   [FK] → ID categoría padre (si es hija)
+
+[ product_categories ]
+
+product_id 	       [FK] → Relación con productos
+category_id	       [FK] → Relación con categorías
+
+[ attributes ]
+
+attribute_id	   [PK] → ID atributo
+name 				    → Nombre del atributo (Ejemplo: Talla, Color)
+
+[ attribute_values ]
+
+value_id		   [PK] → ID valor
+attribute_id 	   [FK] → Relación con atributos
+value				    → Valor (Ejemplo: S, M, Azul)
+
+[ product_value]
+
+product_id 	       [FK] → Relación con producto
+value_id		   [FK] → Relación con valor
+
+[ users ]
+
+user_id              [PK] → ID del usuario                  
+email                     → Correo electrónico del usuario
+password_hash             → Hash de la contraseña (almacenamiento seguro)
+
+[ customers ]
+
+customer_id
+user_id
+rut
+first_name
+last_name
+phone
+
+[ user_address ]
+
+address_id           [PK] → ID único de dirección
+customer_id          [FK] → Relación con el cliente (registrado o invitado)
+address_line1             → Línea principal de dirección (calle, número)
+address_line2             → Línea adicional de dirección (dpto, etc.)
+city_id              [FK] → Relación con la ciudad
+state_id             [FK] → Relación con el estado o región
+
+[ states ]
+
+state_id             [PK] → ID de la región o estado
+name                      → Nombre completo (ej. Región Metropolitana)
+short_name                → Abreviación o código (ej. RM)
+
+[ cities ]
+
+city_id              [PK] → ID de la ciudad
+name                      → Nombre de la ciudad (ej. Santiago)
+state_id             [FK] → Relación con la región o estado
+
+[ orders ]
+
+order_id            [PK] → ID único del pedido
+customer_id         [FK] → Relación con el comprador que realizó el pedido
+address_id          [FK] → Dirección de entrega asociada al pedido
+order_date               → Fecha y hora en que se realizó el pedido
+status                   → Estado general del pedido (pending, processing, completed, etc.)
+subtotal                 → Monto total de los productos incluidos en el pedido
+shipping_cost            → Costo de envío asociado al pedido
+total                    → Total pagado (subtotal + shipping_cost)
+
+[ order_items ]
+
+order_id             [FK] → Relación con la orden principal
+product_id           [FK] → Producto comprado
+quantity                  → Cantidad del producto en la orden
+unit_price                → Precio unitario del producto al momento de la compra
+total_price               → Precio total por producto (unit_price * quantity)
+
+[ payments ]
+
+payment_id           [PK] → ID único del pago
+order_id             [FK] → Relación con la orden pagada
+provider                  → Proveedor del método de pago (ej. Webpay, PayPal)
+amount                    → Monto pagado (puede incluir productos + envío)
+status                    → Estado del pago (ej. paid, failed, pending)
+paid_at                   → Fecha y hora en que se registró el pago exitoso
+transaction_id            → Código o ID de la transacción con el proveedor
+document_type             → Tipo de documento (boleta/factura) (redundancia útil para trazabilidad)
+
+[ shippings ]
+
+shipping_id         [PK] → ID único del envío
+order_id            [FK] → Relación con la orden despachada
+shipping_method          → Método de despacho (ej. Retiro en tienda, Despacho a domicilio)
+carrier                  → Nombre de la empresa transportista (ej. Chilexpress)
+tracking_code            → Código de seguimiento proporcionado por el transportista
+status                   → Estado logístico del envío
+dispatched_at            → Fecha y hora en que el pedido fue despachado
+delivered_at             → Fecha y hora en que el pedido fue entregado
+
+[ shipping_methods ]
+
+shipping_method_id   [PK] → ID único del método
+name                      → Nombre del método (ej. "Retiro en Tienda", "Despacho a Domicilio")
+carrier                   → Empresa transportista asociada (opcional)
+cost                      → Costo de envío
