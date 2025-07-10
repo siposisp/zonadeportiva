@@ -23,14 +23,11 @@ const app = express();
 
 // Configuración de CORS
 const corsOptions = {
-  origin: (origin, callback) => {
-    callback(null, true); // Acepta cualquier origen dinámicamente
-  },
-  credentials: true, // Para permitir cookies
+  origin: 'https://zonadeportiva.loca.lt' || 'http://localhost:3001' || 'https://zonadeportiva-yyqc.onrender.com',
+  credentials: true, // IMPORTANTE: Permite cookies en requests cross-origin
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-token-response'],
 };
-
 
 app.use(cors(corsOptions));
 
