@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const baseURL = 'http://localhost:3000'
+const baseURL = 'https://zonadeportiva-yyqc.onrender.com'
 const forgotPassword = async (email) => {
     const response = await axios.post(`${baseURL}/auth-email/forgot-password`, email)
     return response.data

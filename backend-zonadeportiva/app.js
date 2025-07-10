@@ -23,7 +23,7 @@ const app = express();
 
 // Configuración de CORS
 const corsOptions = {
-  origin: true,           // Permite cualquier origen
+  origin: '*',          // Permite cualquier origen
   credentials: true, // IMPORTANTE: Permite cookies en requests cross-origin
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-token-response'],

@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const baseURL = 'http://localhost:3000/order'
+const baseURL = 'https://zonadeportiva-yyqc.onrender.com/order'
 
 const createOrder = async (order) => {
     const response = await axios.post(`${baseURL}/generate-order`, order, {

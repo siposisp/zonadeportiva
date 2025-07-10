@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const baseURL = 'http://localhost:3000/cart'
+const baseURL = 'https://zonadeportiva-yyqc.onrender.com/cart'
 
 const addToCart = async (cart, product_id, quantity) => {
     const response = await axios.post(`${baseURL}/add-to-cart`, { cart, product_id, quantity }, {

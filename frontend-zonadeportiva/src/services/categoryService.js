@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const baseURL = 'http://localhost:3000/category'
+const baseURL = 'https://zonadeportiva-yyqc.onrender.com/category'
 
 const getCategories = async () => {
     const response = await axios.get(`${baseURL}/get-grouped-categories`)

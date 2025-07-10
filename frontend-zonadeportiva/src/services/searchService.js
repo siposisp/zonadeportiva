@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const baseURL = 'http://localhost:3000/product'
+const baseURL = 'https://zonadeportiva-yyqc.onrender.com/product'
 
 const getSearchByKeyword = async (keyword) => {
     const response = await axios.post(`${baseURL}/get-product-by-keyword`, keyword)
