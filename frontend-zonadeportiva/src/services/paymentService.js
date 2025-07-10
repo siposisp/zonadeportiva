@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const baseURL = 'https://zonadeportiva-yyqc.onrender.com'
+const baseURL = 'http://localhost:3000'
 
 const initPayment = async (transaction) => {
     const response = await axios.post(`${baseURL}/webpay/create`, transaction)

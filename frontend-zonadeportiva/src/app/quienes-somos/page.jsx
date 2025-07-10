@@ -1,3 +1,6 @@
+'use client';
+export const dynamic = 'force-dynamic';
+
 import AboutDescription from "@/components/features/About/AboutDescription"
 import AboutFAQ from "@/components/features/About/AboutFAQ"
 

@@ -1,9 +1,11 @@
 import axios from "axios"
 
-const baseURL = 'https://zonadeportiva-yyqc.onrender.com/shipping-method'
+const baseURL = 'http://localhost:3000/shipping-method'
 
-const getShippingMethods = async (city_id) => {
-    const response = await axios.get(`${baseURL}/get-shipping-methods/${city_id}`)
+const getShippingMethods = async (state_id) => {
+    const response = await axios.get(`${baseURL}/get-shipping-methods/${state_id}`, {
+        withCredentials: true
+    })
     return response.data
 }
 

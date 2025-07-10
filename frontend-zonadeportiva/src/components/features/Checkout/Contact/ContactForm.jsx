@@ -12,8 +12,8 @@ export default function ContactForm({ step, onNext, onBack }) {
 
     const [formData, setFormData] = useState({
         email: "",
-        first_name: "",
-        last_name: "",
+        firstName: "",
+        lastName: "",
         phone: "",
         rut: "",
     })
@@ -32,8 +32,8 @@ export default function ContactForm({ step, onNext, onBack }) {
 
                     const newData = {
                         email: user.email ?? "",
-                        first_name: user.first_name ?? "",
-                        last_name: user.last_name ?? "",
+                        firstName: user.first_name ?? "",
+                        lastName: user.last_name ?? "",
                         phone: user.phone ?? "",
                         rut: user.rut ?? "",
                     }

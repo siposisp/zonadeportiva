@@ -70,16 +70,14 @@ export default function AddressForm({ step, onNext, onBack }) {
         try {
             const { addresses } = await userService.getUserAddress()
             setUserAddresses(addresses)
-            if (addresses.length) handleUserAddress(addresses[0])
+            if (addresses.length) handleUseAddress(addresses[0])
         } catch (e) {
             console.error("Error fetching addresses:", e)
         }
     }
 
-    const handleUserAddress = (address) => {
-
+    const handleUseAddress = (address) => {
         setFormData({
-            ...(isAuthenticated && { address_id: String(address.address_id) }),
             state_id: String(address.state_id),
             city_id: String(address.city_id),
             address: address.address,
@@ -114,7 +112,7 @@ export default function AddressForm({ step, onNext, onBack }) {
                 const { addresses } = await userService.getUserAddress()
                 setUserAddresses(addresses)
                 const latest = addresses[addresses.length - 1]
-                handleUserAddress(latest)
+                handleUseAddress(latest)
             }
             onNext(formData)
         } catch (error) {
@@ -151,7 +149,7 @@ export default function AddressForm({ step, onNext, onBack }) {
                             <AddressSelector
                                 userAddresses={userAddresses}
                                 selectedAddressId={selectedAddressId}
-                                onSelect={handleUserAddress}
+                                onSelect={handleUseAddress}
                                 onDelete={deleteUserAddress}
                                 onAdd={() => onNext(formData)}
                                 newAddress={newAddress}

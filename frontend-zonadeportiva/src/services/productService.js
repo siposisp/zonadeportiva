@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const baseURL = 'https://zonadeportiva-yyqc.onrender.com/product'
+const baseURL = 'http://localhost:3000/product'
 
 const getProducts = async () => {
     const response = await axios.get(baseURL)
@@ -8,7 +8,7 @@ const getProducts = async () => {
 }
 
 const getProductById = async (product_id) => {
-    const response = await axios.get(`https://zonadeportiva-yyqc.onrender.com/cart/${product_id}`)
+    const response = await axios.get(`http://localhost:3000/cart/${product_id}`)
     return response.data
 }
 

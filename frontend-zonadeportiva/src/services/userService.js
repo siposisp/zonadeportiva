@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const baseURL = 'https://zonadeportiva-yyqc.onrender.com/customer'
+const baseURL = 'http://localhost:3000/customer'
 
 const getUser = async () => {
     const response = await axios.get(`${baseURL}`, {

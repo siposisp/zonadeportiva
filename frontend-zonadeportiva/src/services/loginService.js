@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const baseURL = 'https://zonadeportiva-yyqc.onrender.com/user'
+const baseURL = 'http://localhost:3000/user'
 
 const loginUser = async (user) => {
     const response = await axios.post(`${baseURL}/login`, user, {

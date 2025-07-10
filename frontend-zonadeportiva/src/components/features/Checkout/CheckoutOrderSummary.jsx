@@ -29,32 +29,27 @@ export default function CheckoutOrderSummary({ checkoutData, step }) {
         }
     }
 
-    const handleGenerateOrder = async () => {
-        try {
-            console.log("CHECKOUT DATA: ", checkoutData)
+  const handleGenerateOrder = async () => {
+      try {
+          const newOrder = {
+              cart: currentCart.cart_items,
+              shipping_cost: checkoutData.shipping.cost
+          }
 
-            const newOrder = {
-                contact: { ...checkoutData.contact },
-                address: { ...checkoutData.address },
-                shipping: { ...checkoutData.shipping,
-                    shipping_cost: checkoutData.shipping.cost
-                },
-                payment: { ...checkoutData.payment },
-                cart: currentCart.cart_items
-            }
+          const { order } = await orderService.createOrder(newOrder)
 
-            const { order } = await orderService.createOrder(newOrder)
-            
-            const buyOrder = order.buyOrder
-            const amount = order.total
+          console.log("Orden creada:", order)
 
-            router.push(
-                `${checkoutData.payment.redirectPath}?amount=${amount}&order=${buyOrder}`
-            )
-        } catch (error) {
-            console.error("Error al crear la orden:", error)
-        }
-    }
+          const buyOrder = order.buyOrder
+          const amount = order.total
+
+          router.push(
+              `${checkoutData.payment.redirectPath}?amount=${amount}&order=${buyOrder}`
+          )
+      } catch (error) {
+          console.error("Error al crear la orden:", error)
+      }
+  }
 
     useEffect(() => {
         loadCart()
@@ -63,8 +58,8 @@ export default function CheckoutOrderSummary({ checkoutData, step }) {
     const isReadyToPay =
         step === "summary" &&
         checkoutData?.contact?.email &&
-        checkoutData?.contact?.first_name &&
-        checkoutData?.contact?.last_name &&
+        checkoutData?.contact?.firstName &&
+        checkoutData?.contact?.lastName &&
         checkoutData?.contact?.phone &&
         checkoutData?.contact?.rut &&
         checkoutData?.address?.state_id &&
