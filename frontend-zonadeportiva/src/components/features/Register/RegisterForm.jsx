@@ -12,8 +12,8 @@ import { isValidField } from "@/utils/validators"
 export default function RegisterForm() {
     const [formData, setFormData] = useState({
         email: "",
-        firstName: "",
-        lastName: "",
+        first_name: "",
+        last_name: "",
         phone: "",
         rut: "",
         password: ""
@@ -40,7 +40,8 @@ export default function RegisterForm() {
         setErrorMessage("")
 
         try {
-            await registerService.registerUser(formData)
+            const response = await registerService.registerUser(formData)
+            console.log("RESPONSE: ", response)
 
             await cartService.createCart()
 
@@ -79,19 +80,19 @@ export default function RegisterForm() {
             <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                 <InputField
                     label="Nombre"
-                    name="firstName"
+                    name="first_name"
                     type="text"
                     placeholder="Ingresa un nombre"
-                    value={formData.firstName}
+                    value={formData.first_name}
                     onChange={handleChange}
                 />
 
                 <InputField
                     label="Apellidos"
-                    name="lastName"
+                    name="last_name"
                     type="text"
                     placeholder="Ingresa un apellido"
-                    value={formData.lastName}
+                    value={formData.last_name}
                     onChange={handleChange}
                 />
 

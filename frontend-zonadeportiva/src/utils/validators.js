@@ -1,15 +1,13 @@
-import { validate as validateRut } from 'rut.js'
-
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 export const validators = {
-    firstName: {
+    first_name: {
         pattern: /^[A-Za-zÀ-ÿ\s]{3,30}$/,
         title: "Ingresa un nombre sin símbolos ni caracteres especiales.",
     },
-    lastName: {
+    last_name: {
         pattern: /^[A-Za-zÀ-ÿ\s]{3,30}$/,
         title: "Ingresa apellidos sin símbolos ni caracteres especiales.",
     },

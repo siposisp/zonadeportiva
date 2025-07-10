@@ -24,19 +24,19 @@ export default function ContactFormEditor({
 
                 <InputField
                     label="Nombre"
-                    name="firstName"
+                    name="first_name"
                     type="text"
                     placeholder="Ingresa tu nombre"
-                    value={formData.firstName}
+                    value={formData.first_name}
                     onChange={onChange}
                 />
 
                 <InputField
                     label="Apellido"
-                    name="lastName"
+                    name="last_name"
                     type="text"
                     placeholder="Ingresa tu apellido"
-                    value={formData.lastName}
+                    value={formData.last_name}
                     onChange={onChange}
                 />
 

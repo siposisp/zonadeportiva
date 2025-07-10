@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useRef, Suspense } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useRef, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import accountService from "@/services/accountService"
 import InputField from "@/components/common/inputs/InputField"
 import PrimaryButton from "@/components/common/buttons/PrimaryButton"
-import ParamsTokenReader from "./ParamsTokenReader"
 
 export default function ResetPasswordForm() {
   const [password, setPassword] = useState("")
@@ -13,16 +12,18 @@ export default function ResetPasswordForm() {
   const [submitted, setSubmitted] = useState(false)
   const [token, setToken] = useState("")
   const formRef = useRef(null)
+  const searchParams = useSearchParams()
   const router = useRouter()
+
+  useEffect(() => {
+    const tokenFromUrl = searchParams.get("token")
+    if (tokenFromUrl) setToken(tokenFromUrl)
+  }, [searchParams])
 
   const isFormValid = () =>
     password.trim() !== "" &&
     confirmPassword.trim() !== "" &&
     (formRef.current?.checkValidity() ?? false)
-
-  const handleToken = (tokenFromUrl) => {
-    setToken(tokenFromUrl)
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -49,10 +50,6 @@ export default function ResetPasswordForm() {
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <Suspense fallback={null}>
-        <ParamsTokenReader onToken={handleToken} />
-      </Suspense>
-
       <div className="flex flex-col gap-2 border-b border-neutral-200 pb-4">
         <h2 className="text-2xl font-bold">Restablecer contraseña</h2>
         <p className="text-sm text-neutral-600">

@@ -10,7 +10,7 @@ export default function ContactFormSummary({ formData, isAuthenticated, onEdit }
                 <div className="flex flex-col gap-2 text-sm">
                     <p className="text-neutral-500 uppercase">{!isAuthenticated ? "Datos ingresados" : "Datos de contacto"}</p>
                     <div className="text-neutral-800 space-y-[2px]">
-                        <p>{formData.firstName} {formData.lastName}</p>
+                        <p>{formData.first_name} {formData.last_name}</p>
                         <p>{formData.email}</p>
                         <p>{formData.phone}</p>
                         <p>{formData.rut}</p>
