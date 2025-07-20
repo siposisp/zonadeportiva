@@ -3,14 +3,40 @@ import Category from '../models/category.js';
 import Product from '../models/product.js';
 import { getValueDetailsAndProducts, sortProducts } from './product.controller.js';
 
-
-/////////////////////////////CREATE/////////////////////////////
-////////////////////////////////////////////////////////////////
-
-/////////////////////////////UTPDATE////////////////////////////
-////////////////////////////////////////////////////////////////
-
-//////////////////////////////READ//////////////////////////////
+/**
+ * @swagger
+ * /category/:
+ *   get:
+ *     summary: Obtener todas las categorías
+ *     description: Retorna todas las categorías disponibles, sin distinguir jerarquía entre padres e hijos.
+ *     tags:
+ *       - Categorías
+ *     responses:
+ *       200:
+ *         description: Lista completa de categorías
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 5
+ *                   slug:
+ *                     type: string
+ *                     example: "zapatillas"
+ *                   name:
+ *                     type: string
+ *                     example: "Zapatillas"
+ *                   parent_id:
+ *                     type: integer
+ *                     nullable: true
+ *                     example: null
+ *       500:
+ *         description: Error interno al obtener categorías
+ */
 // Listado completo de todas las categorias (no discrimina entre categoria y subcategorias)
 export const getCategories = async (req, res) => {
     try {
@@ -66,6 +92,54 @@ const getSubcategoriesByParent = async (parentId) => {
   }
 };
 
+
+/**
+ * @swagger
+ * /category/get-grouped-categories:
+ *   get:
+ *     summary: Obtener categorías agrupadas con subcategorías
+ *     description: Devuelve las categorías padres con sus subcategorías agrupadas. Si una categoría no tiene hijos, el arreglo estará vacío.
+ *     tags:
+ *       - Categorías
+ *     responses:
+ *       200:
+ *         description: Lista agrupada de categorías y subcategorías
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   parent_id:
+ *                     type: integer
+ *                     example: 1
+ *                   slug:
+ *                     type: string
+ *                     example: "ropa-hombre"
+ *                   category:
+ *                     type: string
+ *                     example: "Ropa Hombre"
+ *                   subcategories:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 4
+ *                         name:
+ *                           type: string
+ *                           example: "Pantalones"
+ *                         slug:
+ *                           type: string
+ *                           example: "pantalones"
+ *                         parent_id:
+ *                           type: integer
+ *                           example: 1
+ *       500:
+ *         description: Error al obtener categorías agrupadas
+ */
 // Obtiene un listado con categorias y cada categoria tiene subcategorias, si no tiene subcategorías, el arreglo subcategorías queda vacio
 export const getGroupedCategories = async (req, res) => {
   try {
@@ -212,6 +286,79 @@ const mergeProductWithDetails = async (product, detailsMap) => {
 
 
 
+/**
+ * @swagger
+ * /category/products-by-categories:
+ *   post:
+ *     summary: Obtener productos por categoría
+ *     description: Retorna productos que pertenecen a la categoría indicada por su slug, incluyendo subcategorías. Soporta paginación y ordenamiento.
+ *     tags:
+ *       - Categorías
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - slug
+ *             properties:
+ *               slug:
+ *                 type: string
+ *                 example: "zapatillas"
+ *               page:
+ *                 type: integer
+ *                 example: 1
+ *               sort:
+ *                 type: string
+ *                 enum: [price_asc, price_desc, name_asc, name_desc]
+ *                 example: "price_desc"
+ *     responses:
+ *       200:
+ *         description: Productos obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 slug:
+ *                   type: string
+ *                   example: "zapatillas"
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 3
+ *                 totalProducts:
+ *                   type: integer
+ *                   example: 60
+ *                 sortBy:
+ *                   type: string
+ *                   example: "price"
+ *                 order:
+ *                   type: string
+ *                   example: "desc"
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       title:
+ *                         type: string
+ *                       price:
+ *                         type: number
+ *                       slug:
+ *                         type: string
+ *                       visibility:
+ *                         type: string
+ *       400:
+ *         description: Falta el parámetro slug
+ *       500:
+ *         description: Error al obtener productos
+ */
 // Función que entrega un listado de productos, considerando la categoría y subcategoría
 export const getProductsByCategories = async (req, res) => {
   const { slug, page = 1, sort } = req.body;

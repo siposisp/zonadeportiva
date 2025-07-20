@@ -6,7 +6,6 @@ import {
   verifyToken, 
   logoutUser,
   refreshToken,
-  setPassword,
   resetPassword
 } from "../controllers/user.controller.js";
 import { authenticateToken, optionalAuth} from "../middleware/auth.js";

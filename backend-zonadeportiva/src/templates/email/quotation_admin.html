@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Nueva Solicitud de Cotización</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    .email-container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+
+    .header {
+      background-color: #e10073;
+      color: white;
+      padding: 20px 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .content p {
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .quotation-id {
+      font-weight: bold;
+      color: #e10073;
+      font-size: 16px;
+    }
+
+    .customer-info {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+
+    .customer-info h3 {
+      margin: 0 0 10px 0;
+      color: #e10073;
+    }
+
+    .customer-info p {
+      margin: 5px 0;
+    }
+
+    .message-box {
+      background-color: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .message-box h4 {
+      margin: 0 0 10px 0;
+      color: #856404;
+    }
+
+    .message-box p {
+      margin: 0;
+      color: #856404;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    table th, table td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    table th {
+      background-color: #f8f8f8;
+    }
+
+    .footer {
+      font-size: 0.9em;
+      color: #777;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .footer p {
+      margin: 0;
+      padding: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #4a148c; padding: 30px 0;">
+    <tr>
+      <td align="center">
+        <div class="email-container" style="width: 100%; max-width: 600px; margin: 0 auto; display: block;">
+          <div class="header">
+            <h1>Nueva Solicitud de Cotización: <span class="quotation-id">#{{ quotationId }}</span></h1>
+          </div>
+
+          <div class="content">
+            <p>Has recibido una nueva solicitud de cotización:</p>
+            <p><strong>Fecha:</strong> {{ quotationDate }}</p>
+
+            <div class="customer-info">
+              <h3>Información del Cliente</h3>
+              <p><strong>Nombre:</strong> {{ customerName }}</p>
+              <p><strong>Email:</strong> {{ customerEmail }}</p>
+            </div>
+
+            <div class="message-box">
+              <h4>Mensaje del Cliente:</h4>
+              <p>{{ message }}</p>
+            </div>
+
+            <h3>Productos Solicitados:</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ itemList }}
+              </tbody>
+            </table>
+
+            <div class="footer">
+              <p>Responde directamente al cliente en: <strong>{{ customerEmail }}</strong></p>
+              <p>Este correo es automático desde <strong>{{ appName }}</strong>.</p>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

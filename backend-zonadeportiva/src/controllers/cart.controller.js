@@ -1,6 +1,60 @@
 import cartService from '../services/cart.service.js'
 import { validateProductStock } from '../services/product.service.js'
 
+/**
+ * @swagger
+ * /cart/create:
+ *   post:
+ *     summary: Crear o recuperar carrito de usuario
+ *     description: Crea un nuevo carrito para el usuario autenticado o recupera uno existente si ya existe.
+ *     tags:
+ *       - Carrito
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Carrito creado o recuperado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Carrito creado o recuperado exitosamente"
+ *                 cart:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     user_id:
+ *                       type: integer
+ *                       example: 123
+ *                     cart_items:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                       example: []
+ *                     total:
+ *                       type: number
+ *                       example: 0
+ *                     quantity:
+ *                       type: integer
+ *                       example: 0
+ *       401:
+ *         description: Usuario no autenticado
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
 const createCart = async (req, res) => {
     try {
         const user_id = req.user.id
@@ -15,6 +69,85 @@ const createCart = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /cart/:
+ *   get:
+ *     summary: Obtener carrito del usuario
+ *     description: Retorna el carrito completo del usuario autenticado con todos sus items.
+ *     tags:
+ *       - Carrito
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Carrito obtenido exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Carrito obtenido exitosamente"
+ *                 cart:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     user_id:
+ *                       type: integer
+ *                       example: 123
+ *                     cart_items:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             example: 1
+ *                           product_id:
+ *                             type: integer
+ *                             example: 456
+ *                           quantity:
+ *                             type: integer
+ *                             example: 2
+ *                           unit_price:
+ *                             type: number
+ *                             example: 29.99
+ *                           total_price:
+ *                             type: number
+ *                             example: 59.98
+ *                     total:
+ *                       type: number
+ *                       example: 59.98
+ *                     quantity:
+ *                       type: integer
+ *                       example: 2
+ *       404:
+ *         description: Carrito no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Carrito no encontrado"
+ *       401:
+ *         description: Usuario no autenticado
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
 const getCart = async (req, res) => {
     try {
         const user_id = req.user.id
@@ -65,6 +198,124 @@ const validateProduct = (cart, product, product_id, quantity) => {
     }
 }
 
+/**
+ * @swagger
+ * /cart/add:
+ *   post:
+ *     summary: Agregar producto al carrito
+ *     description: Agrega un producto al carrito del usuario autenticado o al carrito local para usuarios no autenticados. Si el producto ya existe, actualiza la cantidad.
+ *     tags:
+ *       - Carrito
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - product_id
+ *               - quantity
+ *             properties:
+ *               product_id:
+ *                 type: integer
+ *                 description: ID del producto a agregar
+ *                 example: 456
+ *               quantity:
+ *                 type: integer
+ *                 description: Cantidad del producto a agregar
+ *                 minimum: 1
+ *                 example: 2
+ *               cart:
+ *                 type: object
+ *                 description: Carrito local (requerido solo para usuarios no autenticados)
+ *                 properties:
+ *                   cart_items:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         product_id:
+ *                           type: integer
+ *                         quantity:
+ *                           type: integer
+ *                         unit_price:
+ *                           type: number
+ *                         total_price:
+ *                           type: number
+ *     responses:
+ *       200:
+ *         description: Producto agregado/actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Producto agregado/actualizado en el carrito (BD)"
+ *                 cart:
+ *                   type: object
+ *                   properties:
+ *                     cart_items:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           product_id:
+ *                             type: integer
+ *                           quantity:
+ *                             type: integer
+ *                           unit_price:
+ *                             type: number
+ *                           total_price:
+ *                             type: number
+ *                     quantity:
+ *                       type: integer
+ *                       example: 3
+ *                     total:
+ *                       type: number
+ *                       example: 89.97
+ *                 item:
+ *                   type: object
+ *                   properties:
+ *                     product_id:
+ *                       type: integer
+ *                       example: 456
+ *                     quantity:
+ *                       type: integer
+ *                       example: 2
+ *                     unit_price:
+ *                       type: number
+ *                       example: 29.99
+ *                     total_price:
+ *                       type: number
+ *                       example: 59.98
+ *                     product_name:
+ *                       type: string
+ *                       example: "Producto Ejemplo"
+ *       400:
+ *         description: Datos inválidos o stock insuficiente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "No hay suficiente stock disponible"
+ *       500:
+ *         description: Error al agregar al carrito
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error al agregar al carrito"
+ */
 const addToCart = async (req, res) => {
     try {
         const { product_id, quantity, cart } = req.body
@@ -123,6 +374,100 @@ const addToCart = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /cart/remove:
+ *   post:
+ *     summary: Eliminar producto del carrito
+ *     description: Elimina completamente un producto del carrito del usuario autenticado o del carrito local.
+ *     tags:
+ *       - Carrito
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - product_id
+ *             properties:
+ *               product_id:
+ *                 type: integer
+ *                 description: ID del producto a eliminar
+ *                 example: 456
+ *               cart:
+ *                 type: object
+ *                 description: Carrito local (requerido solo para usuarios no autenticados)
+ *                 properties:
+ *                   cart_items:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         product_id:
+ *                           type: integer
+ *                         quantity:
+ *                           type: integer
+ *                         unit_price:
+ *                           type: number
+ *                         total_price:
+ *                           type: number
+ *     responses:
+ *       200:
+ *         description: Producto eliminado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Producto eliminado del carrito en base de datos"
+ *                 cart:
+ *                   type: object
+ *                   properties:
+ *                     cart_items:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           product_id:
+ *                             type: integer
+ *                           quantity:
+ *                             type: integer
+ *                           unit_price:
+ *                             type: number
+ *                           total_price:
+ *                             type: number
+ *                     quantity:
+ *                       type: integer
+ *                       example: 1
+ *                     total:
+ *                       type: number
+ *                       example: 29.99
+ *       400:
+ *         description: Carrito inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Carrito inválido"
+ *       500:
+ *         description: Error al eliminar del carrito
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error al eliminar del carrito"
+ */
 const removeFromCart = async (req, res) => {
     try {
         const { product_id, cart } = req.body
@@ -166,6 +511,68 @@ const removeFromCart = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /cart/product/{id}:
+ *   get:
+ *     summary: Obtener producto por ID
+ *     description: Retorna la información completa de un producto específico por su ID.
+ *     tags:
+ *       - Carrito
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID único del producto
+ *         schema:
+ *           type: integer
+ *           example: 456
+ *     responses:
+ *       200:
+ *         description: Producto obtenido exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 product:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 456
+ *                     title:
+ *                       type: string
+ *                       example: "Producto Ejemplo"
+ *                     slug:
+ *                       type: string
+ *                       example: "producto-ejemplo"
+ *                     metadata:
+ *                       type: object
+ *                       properties:
+ *                         price:
+ *                           type: number
+ *                           example: 29.99
+ *                         regular_price:
+ *                           type: number
+ *                           example: 34.99
+ *                         sale_price:
+ *                           type: number
+ *                           example: 29.99
+ *                         stock:
+ *                           type: integer
+ *                           example: 10
+ *       500:
+ *         description: Error al obtener el producto
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error al obtener el producto"
+ */
 // Mover a controlador de productos
 const getProductById = async (req, res) => {
     try {
@@ -201,6 +608,102 @@ const mergeCartItems = (dbItems, localItems) => {
     return Array.from(map.values())
 }
 
+/**
+ * @swagger
+ * /cart/sync:
+ *   post:
+ *     summary: Sincronizar carrito local con base de datos
+ *     description: Sincroniza el carrito local del usuario con el carrito almacenado en la base de datos, combinando los items de ambos carritos.
+ *     tags:
+ *       - Carrito
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - cart
+ *             properties:
+ *               cart:
+ *                 type: object
+ *                 description: Carrito local a sincronizar
+ *                 properties:
+ *                   cart_items:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         product_id:
+ *                           type: integer
+ *                           example: 456
+ *                         quantity:
+ *                           type: integer
+ *                           example: 2
+ *                         unit_price:
+ *                           type: number
+ *                           example: 29.99
+ *                         total_price:
+ *                           type: number
+ *                           example: 59.98
+ *     responses:
+ *       200:
+ *         description: Carrito sincronizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Carrito sincronizado exitosamente"
+ *                 cart:
+ *                   type: object
+ *                   properties:
+ *                     cart_items:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           product_id:
+ *                             type: integer
+ *                           quantity:
+ *                             type: integer
+ *                           unit_price:
+ *                             type: number
+ *                           total_price:
+ *                             type: number
+ *                     total:
+ *                       type: number
+ *                       example: 89.97
+ *                     quantity:
+ *                       type: integer
+ *                       example: 3
+ *       400:
+ *         description: Carrito inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Carrito inválido"
+ *       401:
+ *         description: Usuario no autenticado
+ *       500:
+ *         description: Error al sincronizar el carrito
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error al sincronizar el carrito"
+ */
 const syncCart = async (req, res) => {
     try {
         const user_id = req.user.id
@@ -234,6 +737,104 @@ const syncCart = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /cart/validate:
+ *   post:
+ *     summary: Validar stock del carrito
+ *     description: Valida la disponibilidad de stock para todos los productos en el carrito de compras, retornando el estado de cada item.
+ *     tags:
+ *       - Carrito
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - cart
+ *             properties:
+ *               cart:
+ *                 type: array
+ *                 description: Array de items del carrito a validar
+ *                 minItems: 1
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - product_id
+ *                     - quantity
+ *                     - unit_price
+ *                     - total_price
+ *                   properties:
+ *                     product_id:
+ *                       type: integer
+ *                       description: ID del producto
+ *                       example: 456
+ *                     quantity:
+ *                       type: integer
+ *                       description: Cantidad solicitada
+ *                       minimum: 1
+ *                       example: 2
+ *                     unit_price:
+ *                       type: number
+ *                       description: Precio unitario del producto
+ *                       example: 29.99
+ *                     total_price:
+ *                       type: number
+ *                       description: Precio total del item
+ *                       example: 59.98
+ *     responses:
+ *       200:
+ *         description: Carrito validado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   product_id:
+ *                     type: integer
+ *                     description: ID del producto
+ *                     example: 456
+ *                   quantity:
+ *                     type: integer
+ *                     description: Cantidad solicitada
+ *                     example: 2
+ *                   unit_price:
+ *                     type: number
+ *                     description: Precio unitario del producto
+ *                     example: 29.99
+ *                   total_price:
+ *                     type: number
+ *                     description: Precio total del item
+ *                     example: 59.98
+ *                   stock:
+ *                     type: string
+ *                     description: Estado del stock del producto
+ *                     enum: [instock, outofstock]
+ *                     example: "instock"
+ *       400:
+ *         description: Datos de entrada inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Debe enviar un arreglo \"cart\" con al menos un ítem."
+ *       500:
+ *         description: Error interno al validar carrito
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno al validar carrito"
+ */
 // Valida producto por producto del carrito de compras, retorna instock si está en stock, sino outofstock 
 export const validateCart = async (req, res) => {
     try {
@@ -241,7 +842,7 @@ export const validateCart = async (req, res) => {
   
       if (!Array.isArray(cart) || cart.length === 0) {
         return res
-          .status(400).json({ message: 'Debe enviar un arreglo “cart” con al menos un ítem.' })
+          .status(400).json({ message: 'Debe enviar un arreglo "cart" con al menos un ítem.' })
       }
       
   
@@ -294,4 +895,3 @@ export const validateCart = async (req, res) => {
 const cartController = { createCart, getCart, addToCart, removeFromCart, syncCart, getProductById, validateCart }
 
 export default cartController
-

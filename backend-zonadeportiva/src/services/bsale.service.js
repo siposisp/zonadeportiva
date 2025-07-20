@@ -3,178 +3,9 @@ import dotenv from 'dotenv';
 import PDFDocument from 'pdfkit';
 import EmailService from '../services/email/email.service.js';
 dotenv.config();
-import { updateProductStockBySku } from '../services/productMeta.service.js';
+//import { updateProductStockBySku } from '../services/productMeta.service.js';
 
 const BSALE_TOKEN = process.env.BSALE_TOKEN;
-
-
-// Esta función obtiene todos los productos de Bsale, incluyendo el id de sus variantes y tipos de producto.
-export const fetchAllProducts = async () => {
-  let allProducts = [];
-  const limit = 50;
-  let offset = 0;
-  let total = null;
-
-  while (true) {
-    const response = await axios.get(`https://api.bsale.io/v1/products.json?limit=${limit}&offset=${offset}`, {
-      headers: {
-        'access_token': BSALE_TOKEN
-      }
-    });
-
-    const products = response.data.items || [];
-
-    if (total === null) {
-      total = response.data.total; // Solo la primera vez
-    }
-
-    console.log(`Offset ${offset} - Productos recibidos: ${products.length}`);
-
-    for (const product of products) {
-      const [variantResponse, productTypeResponse] = await Promise.all([
-        axios.get(product.variants.href, { headers: { 'access_token': BSALE_TOKEN } }),
-        axios.get(product.product_type.href, { headers: { 'access_token': BSALE_TOKEN } })
-      ]);
-
-      const variants = variantResponse.data.items || [];
-      const productType = productTypeResponse.data;
-
-      allProducts.push({
-        product,
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        stockControl: product.stockControl,
-        productType: productType.name || null,
-        variants: variants.map(v => ({
-          id: v.id,
-          name: v.name,
-          price: v.price,
-          stock: v.stock,
-          sku: v.sku,
-          barcode: v.barcode
-        }))
-      });
-    }
-
-    offset += limit;
-
-    if (offset >= total) break;
-  }
-
-  console.log(`Total productos obtenidos: ${allProducts.length}`);
-  return allProducts;
-};
-
-
-
-
-
-
-// Esta función obtiene todos los stocks de Bsale
-export const fetchAllStocks = async () => {
-  let allStocks = [];
-  let offset = 0;
-  const limit = 50;
-  let totalItems = 0;
-
-  do {
-    const response = await axios.get(`https://api.bsale.io/v1/stocks.json`, {
-      headers: {
-        'access_token': BSALE_TOKEN
-      },
-      params: {
-        limit,
-        offset,
-        expand: '[variant,office]'
-      }
-    });
-
-    const items = response.data.items;
-    totalItems = response.data.count;
-
-    items.forEach(item => {
-      allStocks.push({
-        variantId: item.variant?.id || null,
-        variantName: item.variant?.name || null,
-        sku: item.variant?.code || null,
-        barcode: item.variant?.barcode || null,
-        officeId: item.office?.id || null,
-        officeName: item.office?.name || null,
-        quantity: item.quantity,
-        quantityReserved: item.quantityReserved,
-        quantityAvailable: item.quantityAvailable
-      });
-    });
-
-    offset += limit;
-  } while (offset < totalItems);
-
-  return allStocks;
-};
-
-
-
-
-
-
-
-
-
-
-
-
-//Me falta ver el caso de cuando no lo encuentra en la base de datos local, ya que puede ser un prodcuto nuevo que no se ha sincronizado aún.
-// Actualizar todos los stocks de Bsale a la base de datos local
-export const updateAllStocksLocalBd = async () => {
-  let allStocks = [];
-  let offset = 0;
-  const limit = 50;
-  let totalItems = 0;
-
-  do {
-    const response = await axios.get(`https://api.bsale.io/v1/stocks.json`, {
-      headers: {
-        'access_token': BSALE_TOKEN
-      },
-      params: {
-        limit,
-        offset,
-        expand: '[variant,office]'
-      }
-    });
-
-    const items = response.data.items;
-    totalItems = response.data.count;
-
-    items.forEach(item => {
-      allStocks.push({
-        sku: item.variant?.code || null,
-        stock: item.quantity
-      });
-    });
-
-    offset += limit;
-  } while (offset < totalItems);
-
-  //Se actualiza el stock de cada producto en la base de datos local
-  const updatedProducts = await Promise.all(
-    allStocks.map(({ sku, stock }) => {
-      // Si el sku es nulo, lo ignoramos
-      if (!sku) return null;
-      return updateProductStockBySku(sku, stock);
-    })
-  );
-
-  return updatedProducts.filter(p => p); // filtra los null
-
-};
-
-
-
-
-
-
 
 
 // Obtiene el ID de la variante de un producto por su SKU
@@ -273,34 +104,6 @@ export const decreaseStock = async (code, quantity) => {
 
 
 
-export const syncStockFromDocument = async (documentData) => {
-  const lines = documentData.lines || [];
-
-  if (lines.length === 0) {
-    console.log('El documento no tiene líneas (nada que descontar)');
-    return;
-  }
-
-  console.log(`Procesando documento #${documentData.id} con ${lines.length} líneas:`);
-
-  for (const line of lines) {
-    const variantId = line.variant?.id;
-    const variantName = line.variant?.name;
-    const quantitySold = line.quantity;
-
-    if (!variantId || !quantitySold) {
-      console.log('Línea ignorada por datos incompletos:', line);
-      continue;
-    }
-
-    console.log(`Variante ID: ${variantId} | Nombre: ${variantName} | Cantidad vendida: ${quantitySold}`);
-
-    // Simulación de descuento de stock
-    // await updateLocalStock(variantId, quantitySold);
-  }
-
-  console.log('Sincronización de stock simulada finalizada.');
-};
 
 
 
@@ -310,14 +113,7 @@ export const syncStockFromDocument = async (documentData) => {
 
 
 
-
-
-
-
-
-
-
-
+//Genera y envía una boleta por email como PDF adjunto
 export const generarYEnviarBoleta = async (cliente, productos, subtotal, shipping, total, orderId) => {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument();
@@ -369,7 +165,7 @@ export const generarYEnviarBoleta = async (cliente, productos, subtotal, shippin
       }
     });
 
-    // ========== ENCABEZADO ESTILO SMARTFIT ==========
+    // ========== ENCABEZADO ==========
 
     const margin = 50;
     const pageWidth = doc.page.width;

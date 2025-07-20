@@ -1,7 +1,7 @@
 import { Router } from "express"
 import cartController from "../controllers/cart.controller.js"
 import { authenticateToken, optionalAuth } from "../middleware/auth.js"
-
+import quotationController from "../controllers/quotation.controller.js"
 const router = Router()
 
 // Usuario registrado
@@ -14,6 +14,9 @@ router.post("/sync-cart", authenticateToken, cartController.syncCart)
 
 // Mover a rutas de productos
 router.get("/:id", cartController.getProductById)
+
+// Rutas para cotizaciones
+router.post('/quotation', optionalAuth, quotationController.requestQuotation);
 
 //TODO: Implementar cotización de productos
 // front envía lista de productos y sus cantidades, detalles del cliente y # de cotización

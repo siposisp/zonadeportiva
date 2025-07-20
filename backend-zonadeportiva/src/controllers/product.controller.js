@@ -2,7 +2,49 @@ import { pool } from '../../database/connectionPostgreSQL.js';
 import Product from '../models/product.js';
 import { validateProductStock } from '../services/product.service.js';
 
-
+/**
+ * @swagger
+ * /product/:
+ *   get:
+ *     summary: Obtener listado de productos
+ *     description: Retorna los productos tipo 'simple' que están publicados, incluyendo su metadata (precio, visibilidad).
+ *     tags:
+ *       - Productos
+ *     responses:
+ *       200:
+ *         description: Productos obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   title:
+ *                     type: string
+ *                     example: "Polera deportiva"
+ *                   slug:
+ *                     type: string
+ *                     example: "polera-deportiva"
+ *                   price:
+ *                     type: number
+ *                     format: float
+ *                     example: 19990
+ *                   regular_price:
+ *                     type: number
+ *                     format: float
+ *                   sale_price:
+ *                     type: number
+ *                     format: float
+ *                   visibility:
+ *                     type: string
+ *                     example: "visible"
+ *       500:
+ *         description: Error al obtener productos
+ */
 // Obtiene el listado completo de productos
 export const getProducts = async (req, res) => {
   try {
@@ -23,6 +65,32 @@ export const getProducts = async (req, res) => {
 };
 
 
+/**
+ * @swagger
+ * /product/get-product-some-details-by-slug/{slug}:
+ *   get:
+ *     summary: Obtener información básica de un producto por slug
+ *     tags:
+ *       - Productos
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "zapatilla-running"
+ *     responses:
+ *       200:
+ *         description: Producto encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       404:
+ *         description: Producto no encontrado
+ *       500:
+ *         description: Error al obtener producto
+ */
 // Obtiene un producto por slug (solo lo contenido en la tabla products)
 export const getProductSomeDetailsBySlug = async (req, res) => {
   const { slug } = req.params;
@@ -158,10 +226,7 @@ const getChildrenIdsByParentId = async (parentId) => {
     return null;
   }
   
-  //{ id: 906 },  row → row.id = 906
-  //{ id: 907 },  row → row.id = 907
-  //{ id: 908 }   row → row.id = 908
-  return childrenResult.rows.map(row => row.id); // Devuelve lista de IDs
+  return childrenResult.rows.map(row => row.id);
 };
 
 
@@ -346,6 +411,26 @@ export const groupByProductId = (variants) => {
 
 
 
+/**
+ * @swagger
+ * /product/get-variants-by-slug/{slug}:
+ *   get:
+ *     summary: Obtener variantes de producto por slug
+ *     tags:
+ *       - Productos
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "poleron-nike"
+ *     responses:
+ *       200:
+ *         description: Variantes agrupadas por producto_id
+ *       500:
+ *         description: Error al obtener variantes
+ */
 // Obtiene las variantes de un producto usando el slug del padre, 
 export const getVariantsBySlug = async (req, res) => {
   const { slug } = req.params;
@@ -365,6 +450,28 @@ export const getVariantsBySlug = async (req, res) => {
 
 
 
+/**
+ * @swagger
+ * /product/get-product-all-details-by-slug/{slug}:
+ *   get:
+ *     summary: Obtener todos los detalles de un producto padre
+ *     tags:
+ *       - Productos
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "camiseta-adidas"
+ *     responses:
+ *       200:
+ *         description: Producto con detalles completos
+ *       404:
+ *         description: Producto no encontrado
+ *       500:
+ *         description: Error interno
+ */
 // Usando el slug de 1 producto obtiene el detalle completo (todo lo que se necesita desde el front) de 1 producto
 // La función solo utiliza productos que sean padre, dentro de esta función se debe incorporar el manejo de sus variantes como tamaños y colores
 export const getProductAllDetailsBySlug = async (req, res) => {
@@ -397,6 +504,39 @@ export const getProductAllDetailsBySlug = async (req, res) => {
 
 
 
+/**
+ * @swagger
+ * /product/check-stock:
+ *   post:
+ *     summary: Verificar stock disponible de un producto
+ *     tags:
+ *       - Productos
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - product_id
+ *               - quantity
+ *             properties:
+ *               product_id:
+ *                 type: integer
+ *                 example: 101
+ *               quantity:
+ *                 type: integer
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         description: Resultado de la validación
+ *       400:
+ *         description: Parámetros faltantes o inválidos
+ *       404:
+ *         description: Stock insuficiente
+ *       500:
+ *         description: Error interno
+ */
 // Valida la cantidad de productos escogidos para añadir en el carrito (retorna 1 o 0)
 export const checkProductStock = async (req, res) => {
   const { product_id, quantity } = req.body;
@@ -429,6 +569,36 @@ export const checkProductStock = async (req, res) => {
 
 
 
+/**
+ * @swagger
+ * /product/get-product-by-keyword:
+ *   post:
+ *     summary: Buscar productos por palabra clave
+ *     tags:
+ *       - Productos
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               keyword:
+ *                 type: string
+ *                 example: "tenis"
+ *               page:
+ *                 type: integer
+ *                 example: 1
+ *               sort:
+ *                 type: string
+ *                 enum: [price_asc, price_desc, name_asc, name_desc]
+ *                 example: "price_asc"
+ *     responses:
+ *       200:
+ *         description: Resultados paginados de la búsqueda
+ *       500:
+ *         description: Error en la búsqueda
+ */
 //Permite buscar productos por keyword, title, description o short_desc
 export const getProductByKeyword = async (req, res) => {
   const { keyword, page = 1, sort } = req.body;
@@ -511,31 +681,6 @@ export const getProductByKeyword = async (req, res) => {
 
 
 
-
-/*
-{
-  "sortBy": "price",
-  "order": "desc",
-  "products": [
-    {
-      "id": 3166,
-      "slug": "aro-basquetbol-doble-con-resorte",
-      "title": "Aro Basquetbol Doble con Resorte",
-      "price": "38990.00",
-      "regular_price": "38990.00",
-      "sale_price": null,
-      "visibility": "visible"
-    },
-    {
-      "id": 4059,
-      "slug": "cajon-salto-recto-pino",
-      "title": "Cajon Salto Recto pino",
-      "price": "258990.00",
-      "regular_price": "258990.00",
-      "sale_price": null,
-      "visibility": "visible"
-    },
-*/
 // Ordena un listado de productos
 export const sortProducts = async (page, products, sortBy, order) => {
 

@@ -14,16 +14,15 @@ import statesRoutes from './src/routes/state.routes.js';
 import shippingRoutes from './src/routes/shippingMethod.routes.js';
 import linkifyRoutes from './src/routes/linkify.routes.js';
 import authEmail from './src/routes/authEmail.routes.js';
-import bsaleRoutes from './src/routes/bsale.routes.js';
+//import bsaleRoutes from './src/routes/bsale.routes.js';
 import productMetaRoutes from './src/routes/productMeta.routes.js';
-
-
+import {swaggerUi, specs} from './src/utils/swagger.js';
 
 const app = express();
 
 // Configuración de CORS
 const corsOptions = {
-  origin: 'https://zonadeportiva.loca.lt' || 'http://localhost:3001' || 'https://zonadeportiva-yyqc.onrender.com' || 'http://localhost:3000',
+  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
   credentials: true, // IMPORTANTE: Permite cookies en requests cross-origin
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-token-response'],
@@ -57,13 +56,13 @@ app.use('/shipping-method', shippingRoutes);
 // Rutas externas
 app.use('/webpay', webpayRoutes); 
 app.use('/linkify', linkifyRoutes); 
-app.use('/linkify', linkifyRoutes);
 app.use('/auth-email', authEmail);
-app.use('/bsale', bsaleRoutes); 
+//app.use('/bsale', bsaleRoutes); 
 //app.post('/webhook/bsale', bsaleRoutes);
 
 
-
+// Documentación Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 
 // Middleware de manejo de errores
@@ -74,5 +73,8 @@ app.use((err, req, res, next) => {
     code: 'INTERNAL_ERROR'
   });
 });
+
+
+//console.log(`Documentación disponible en: http://localhost:3000/api-docs`);
 
 export default app;

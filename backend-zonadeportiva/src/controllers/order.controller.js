@@ -4,171 +4,6 @@ import { validateProductStock } from '../services/product.service.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
-/*
-export const generateOrder = async (req, res) => {
-  try {
-    const isAuthenticated = !!req.user;
-    const { cart, shipping_cost } = req.body;
-    //const { cart, shipping_cost, provider_id, document_type } = req.body;
-
-    if (!Array.isArray(cart) || cart.length === 0) {
-      return res.status(400).json({ message: 'Debe enviar un arreglo “cart” con al menos un ítem.' });
-    }
-
-    // 1) Validar stock inicial
-    for (const { product_id, quantity } of cart) {
-      const { result } = await validateProductStock(product_id, quantity);
-      if (result !== 1) {
-        return res.status(400).json({ message: `Stock insuficiente para product_id ${product_id}` });
-      }
-    }
-
-    // 2) Calcular totales
-    let subtotal = 0;
-    for (const { total_price } of cart) subtotal += total_price;
-    const total = subtotal + shipping_cost;
-
-    const client = await pool.connect();
-    let orderId, orderDate;
-
-    try {
-      await client.query('BEGIN');
-
-      // Determianr customerId
-      let customerId = null;
-
-      //Si está autenticado
-      if(isAuthenticated) {
-        // 3.a) Obtener customer_id desde la tabla customers
-        const customerRes = await client.query(
-          `SELECT id FROM customers WHERE user_id = $1 LIMIT 1`,
-          [req.user.id]
-        );
-        if (!customerRes.rows.length) {
-          await client.query('ROLLBACK');
-          return res.status(400).json({ message: 'Cliente no existe para este usuario' });
-        }
-        customerId = customerRes.rows[0].id;
-
-
-      // Si NO está autenticado
-      } else {
-        //
-      }
-
-      
-      // 3.b) Insertar la orden
-      const insertOrder = await client.query(
-        `INSERT INTO orders
-           (customer_id, address_id, subtotal, shipping_cost, total, status)
-         VALUES ($1, NULL, $2, $3, $4, 'pending')
-         RETURNING id, order_date`,
-        [customerId, subtotal, shipping_cost, total]
-      );
-      orderId   = insertOrder.rows[0].id;
-      orderDate = insertOrder.rows[0].order_date;
-
-      // Insertar en pagos
-      //const insertPayment = await client.query(
-      //  `INSERT INTO orders
-      //     (order_id, provider_id, amount, status, transaction_id, document_type)
-      //   VALUES ($1, $2, $3, $4, $5, $6)`,
-      //  [orderId, 1, total, 'pending', 'null', document_type]
-      //);
-
-
-      // 3.c) Insertar cada ítem y decrementar stock con verificación
-      for (const { product_id, quantity, unit_price, total_price } of cart) {
-        // Insertar en order_items
-        await client.query(
-          `INSERT INTO order_items
-             (order_id, product_id, quantity, unit_price, total_price)
-           VALUES ($1, $2, $3, $4, $5)`,
-          [orderId, product_id, quantity, unit_price, total_price]
-        );
-
-        // Decrementar stock y obtener el nuevo valor
-        const updateRes = await client.query(
-          `UPDATE product_meta
-             SET stock = stock - $1
-           WHERE product_id = $2
-           RETURNING stock`,
-          [quantity, product_id]
-        );
-
-        if (updateRes.rowCount === 0) {
-          console.error(`No se encontró product_meta para product_id ${product_id}`);
-        } else {
-          console.log(`Stock actualizado para product_id ${product_id}: nuevo stock = ${updateRes.rows[0].stock}`);
-        }
-      }
-
-      await client.query('COMMIT');
-    } catch (err) {
-      await client.query('ROLLBACK');
-      console.error('Error al crear orden:', err);
-      return res.status(500).json({ message: 'Error interno al crear la orden' });
-    } finally {
-      client.release();
-    }
-
-    // 4) Revertir stock si la orden sigue 'pending' tras el delay configurado
-    const REVERT_DELAY_MS = parseInt(process.env.REVERT_DELAY_MS, 10) || 5 * 60 * 1000;
-    console.log(`Programado revertir stock para orden ${orderId} en ${REVERT_DELAY_MS} ms`);
-    setTimeout(async () => {
-      console.log(`Ejecutando revertir stock para orden ${orderId}`);
-      try {
-        const { rows: [{ status }] } = await pool.query(
-          `SELECT status FROM orders WHERE id = $1`,
-          [orderId]
-        );
-        console.log(`Estado actual de orden ${orderId}:`, status);
-        if (status === 'pending') {
-          // Cancelar la orden
-          await pool.query(
-            `UPDATE orders SET status = 'cancelled' WHERE id = $1`,
-            [orderId]
-          );
-          console.log(`Orden ${orderId} cancelada`);
-
-          // Restaurar stock
-          const { rows: items } = await pool.query(
-            `SELECT product_id, quantity FROM order_items WHERE order_id = $1`,
-            [orderId]
-          );
-          for (const { product_id, quantity } of items) {
-            const restoreRes = await pool.query(
-              `UPDATE product_meta
-                 SET stock = stock + $1
-               WHERE product_id = $2
-               RETURNING stock`,
-              [quantity, product_id]
-            );
-            if (restoreRes.rowCount) {
-              console.log(`Restaurado stock para product_id ${product_id}: nuevo stock = ${restoreRes.rows[0].stock}`);
-            }
-          }
-          console.log(`Reversión completa para orden ${orderId}`);
-        } else {
-          console.log(`No se revierte stock: orden ${orderId} está en estado '${status}'`);
-        }
-      } catch (e) {
-        console.error('Error al revertir reserva para orden', orderId, e);
-      }
-    }, REVERT_DELAY_MS);
-
-    // 5) Responder al cliente
-    return res.status(201).json({
-      message: 'Orden creada y stock reservado (caduca en 5 minutos)',
-      order: { buyOrder: orderId, order_date: orderDate, subtotal, shipping_cost, total }
-    });
-
-  } catch (error) {
-    console.error('Error en generateOrder:', error);
-    return res.status(500).json({ message: 'Error interno al generar orden' });
-  }
-};
-*/
 
 
 // Validar que el carrito es un arreglo y tiene al menos un ítem
@@ -327,24 +162,164 @@ function scheduleStockReversion(orderId, delayMs) {
   }, delayMs);
 }
 
+
+
+
+/**
+ * @swagger
+ * /order/generate-order:
+ *   post:
+ *     summary: Generar una orden de compra
+ *     description: Crea una orden con los datos del cliente, dirección, método de envío y carrito de productos. Puede ejecutarse con o sin autenticación (usuario registrado o invitado).
+ *     tags:
+ *       - Órdenes
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - contact
+ *               - address
+ *               - shipping
+ *               - cart
+ *             properties:
+ *               contact:
+ *                 type: object
+ *                 description: Datos del cliente (registrado o invitado)
+ *                 properties:
+ *                   email:
+ *                     type: string
+ *                     format: email
+ *                     example: "invitado@ejemplo.com"
+ *                   first_name:
+ *                     type: string
+ *                     example: "Juan"
+ *                   last_name:
+ *                     type: string
+ *                     example: "Pérez"
+ *                   phone:
+ *                     type: string
+ *                     example: "+56912345678"
+ *                   rut:
+ *                     type: string
+ *                     description: RUT chileno del cliente
+ *                     example: "12.345.678-9"
+ *               address:
+ *                 type: object
+ *                 description: Dirección del cliente
+ *                 properties:
+ *                   address_id:
+ *                     type: integer
+ *                     nullable: true
+ *                     example: null
+ *                   address:
+ *                     type: string
+ *                     example: "Av. Siempre Viva 742"
+ *                   apartment:
+ *                     type: string
+ *                     example: "Depto. 201"
+ *                   state_id:
+ *                     type: integer
+ *                     example: 13
+ *                   city_id:
+ *                     type: integer
+ *                     example: 27
+ *                   number:
+ *                     type: integer
+ *                     example: 742
+ *               shipping:
+ *                 type: object
+ *                 description: Método de envío y su costo
+ *                 properties:
+ *                   shipping_cost:
+ *                     type: number
+ *                     format: float
+ *                     example: 3990
+ *               cart:
+ *                 type: array
+ *                 description: Productos seleccionados en el carrito
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - product_id
+ *                     - quantity
+ *                   properties:
+ *                     product_id:
+ *                       type: integer
+ *                       example: 123
+ *                     quantity:
+ *                       type: integer
+ *                       example: 2
+ *     responses:
+ *       201:
+ *         description: Orden creada correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Orden creada y stock reservado (caduca en 5 minutos)"
+ *                 order:
+ *                   type: object
+ *                   properties:
+ *                     buyOrder:
+ *                       type: integer
+ *                       description: ID de la orden creada
+ *                       example: 234
+ *                     order_date:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2025-07-15T12:34:56.000Z"
+ *                     subtotal:
+ *                       type: integer
+ *                       example: 45980
+ *                     shipping_cost:
+ *                       type: integer
+ *                       example: 3990
+ *                     total:
+ *                       type: integer
+ *                       example: 49970
+ *       400:
+ *         description: Error de validación (carrito o stock)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Stock insuficiente para el producto X"
+ *       500:
+ *         description: Error interno al generar la orden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno al crear la orden"
+ */
 // Generar una orden de compra
 export const generateOrder = async (req, res) => {
   try {
     const isAuthenticated = !!req.user;
-    //const { cart, shipping_cost, address_id = 'null', address, apartment, number, email, first_name, last_name, phone, city_id = 'null', state_id = 'null'} = req.body;
-    const { cart, shipping_cost } = req.body;
-    let address_id
-    let address = 'Calle Falsa 123'
-    let apartment = 'E12'
-    let number = '123'
-    let email = 'nicosuperapellido@gmail.com'
-    let first_name = 'Nicolás'
-    let last_name = 'Gajardo'
-    let rut = '20576970-6'
-    let phone = '987654321'
-    let city_id = 310
-    let state_id = 16
 
+    const { contact, address: addressData, shipping, cart } = req.body;
+
+    let { email, first_name, last_name, phone, rut } = contact
+    let { address_id = null, address, apartment, state_id, city_id, number } = addressData
+    let { shipping_cost } = shipping
+
+    console.log("cart", cart)
+    console.log("contact", { email, first_name, last_name, phone, rut })
+    console.log("address", { address_id, address, apartment, state_id, city_id, number })
+    console.log("shipping_cost", shipping_cost)
+    
     // Validar formato de carrito
     const formatCheck = validateCartFormat(cart);
     if (!formatCheck.valid) {

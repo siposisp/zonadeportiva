@@ -1,6 +1,152 @@
 import { pool } from '../../database/connectionPostgreSQL.js';
 import { updateCustomerInfo, getCustomerAddresses, getCustomerIdByUserId, createCustomerAddress, updateCustomerAddress, deleteCustomerAddress, verifyAddressOwnership} from '../services/customer.service.js';
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Customer:
+ *       type: object
+ *       properties:
+ *         user_id:
+ *           type: integer
+ *           description: ID del usuario
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: Email del usuario
+ *         role:
+ *           type: string
+ *           description: Rol del usuario
+ *         customer_id:
+ *           type: integer
+ *           description: ID del cliente
+ *         rut:
+ *           type: string
+ *           description: RUT del cliente
+ *         first_name:
+ *           type: string
+ *           description: Nombre del cliente
+ *         last_name:
+ *           type: string
+ *           description: Apellido del cliente
+ *         phone:
+ *           type: string
+ *           description: Teléfono del cliente
+ *     
+ *     Address:
+ *       type: object
+ *       properties:
+ *         address_id:
+ *           type: integer
+ *           description: ID de la dirección
+ *         address:
+ *           type: string
+ *           description: Dirección completa
+ *         apartment:
+ *           type: string
+ *           description: Número de apartamento
+ *         number:
+ *           type: string
+ *           description: Número de la dirección
+ *         city_id:
+ *           type: integer
+ *           description: ID de la ciudad
+ *         state_id:
+ *           type: integer
+ *           description: ID del estado/región
+ *     
+ *     CustomerUpdateRequest:
+ *       type: object
+ *       properties:
+ *         rut:
+ *           type: string
+ *           description: RUT del cliente
+ *         first_name:
+ *           type: string
+ *           description: Nombre del cliente
+ *         last_name:
+ *           type: string
+ *           description: Apellido del cliente
+ *         phone:
+ *           type: string
+ *           description: Teléfono del cliente
+ *     
+ *     AddressRequest:
+ *       type: object
+ *       required:
+ *         - address
+ *         - city_id
+ *         - state_id
+ *       properties:
+ *         address:
+ *           type: string
+ *           description: Dirección completa
+ *         apartment:
+ *           type: string
+ *           description: Número de apartamento
+ *         number:
+ *           type: string
+ *           description: Número de la dirección
+ *         city_id:
+ *           type: integer
+ *           description: ID de la ciudad
+ *         state_id:
+ *           type: integer
+ *           description: ID del estado/región
+ *     
+ *     Error:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           description: Mensaje de error
+ *     
+ *     Success:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           description: Mensaje de éxito
+ *   
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
+/**
+ * @swagger
+ * /customer/:
+ *   get:
+ *     summary: Obtener información del cliente autenticado
+ *     tags: [Customer]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Información del cliente obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/Customer'
+ *       404:
+ *         description: Usuario no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 // Obtener información del usuario que esta logueado
 export const getCustomer = async (req, res) => {
   try {
@@ -33,6 +179,51 @@ export const getCustomer = async (req, res) => {
   }
 };
 
+/**
+ * @swagger
+ * /customer/:
+ *   put:
+ *     summary: Actualizar información del cliente
+ *     tags: [Customer]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CustomerUpdateRequest'
+ *           example:
+ *             rut: "12345678-9"
+ *             first_name: "Juan"
+ *             last_name: "Pérez"
+ *             phone: "+56912345678"
+ *     responses:
+ *       200:
+ *         description: Información del cliente actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         description: Se debe proporcionar al menos un campo para actualizar
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Cliente no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 // Actualizar información del customer (sin email ni contraseña)
 export const updateCustomer = async (req, res) => {
   try {
@@ -69,7 +260,40 @@ export const updateCustomer = async (req, res) => {
 
 //---parte de direcciones---
 
-
+/**
+ * @swagger
+ * /customer/address:
+ *   get:
+ *     summary: Obtener dirección del cliente autenticado (primera dirección)
+ *     tags: [Customer]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dirección obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 address:
+ *                   allOf:
+ *                     - $ref: '#/components/schemas/Address'
+ *                     - type: object
+ *                       nullable: true
+ *       404:
+ *         description: Cliente no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 // Obtener dirección del usuario que está logueado (nico, solo devuelve una)
 export const getCustomerAddress = async (req, res) => {
   try {
@@ -117,6 +341,39 @@ export const getCustomerAddress = async (req, res) => {
   }
 };
 
+/**
+ * @swagger
+ * /customer/addresses:
+ *   get:
+ *     summary: Obtener todas las direcciones del cliente autenticado
+ *     tags: [Customer]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Direcciones obtenidas exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 addresses:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Address'
+ *       404:
+ *         description: Cliente no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 // Obtener todas las direcciones del customer que está logueado (nueva)
 export const getCustomerAddressList = async (req, res) => {
   try {
@@ -138,7 +395,58 @@ export const getCustomerAddressList = async (req, res) => {
   }
 };
 
-
+/**
+ * @swagger
+ * /customer/address:
+ *   post:
+ *     summary: Crear una nueva dirección para el cliente
+ *     tags: [Customer]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AddressRequest'
+ *           example:
+ *             address: "Av. Providencia 123"
+ *             apartment: "Depto 4B"
+ *             number: "123"
+ *             city_id: 1
+ *             state_id: 1
+ *     responses:
+ *       201:
+ *         description: Dirección creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Dirección creada exitosamente"
+ *                 address:
+ *                   $ref: '#/components/schemas/Address'
+ *       400:
+ *         description: Campos requeridos faltantes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Cliente no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 //create address
 // Crear una nueva dirección para el customer
 export const createAddress = async (req, res) => {
@@ -177,6 +485,87 @@ export const createAddress = async (req, res) => {
   }
 };
 
+/**
+ * @swagger
+ * /customer/address/{addressId}:
+ *   put:
+ *     summary: Actualizar una dirección específica del cliente
+ *     tags: [Customer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: addressId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la dirección a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               address:
+ *                 type: string
+ *                 description: Dirección completa
+ *               apartment:
+ *                 type: string
+ *                 description: Número de apartamento
+ *               number:
+ *                 type: string
+ *                 description: Número de la dirección
+ *               city_id:
+ *                 type: integer
+ *                 description: ID de la ciudad
+ *               state_id:
+ *                 type: integer
+ *                 description: ID del estado/región
+ *           example:
+ *             address: "Av. Las Condes 456"
+ *             apartment: "Oficina 12"
+ *             number: "456"
+ *             city_id: 2
+ *             state_id: 1
+ *     responses:
+ *       200:
+ *         description: Dirección actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Dirección actualizada exitosamente"
+ *                 address:
+ *                   $ref: '#/components/schemas/Address'
+ *       400:
+ *         description: Se debe proporcionar al menos un campo para actualizar
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: No tienes permisos para actualizar esta dirección
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Cliente o dirección no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 //update address
 // Actualizar una dirección específica del customer (se manda id del front)
 export const updateAddress = async (req, res) => {
@@ -228,7 +617,47 @@ export const updateAddress = async (req, res) => {
   }
 };
 
-
+/**
+ * @swagger
+ * /customer/address/{addressId}:
+ *   delete:
+ *     summary: Eliminar una dirección específica del cliente
+ *     tags: [Customer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: addressId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la dirección a eliminar
+ *     responses:
+ *       200:
+ *         description: Dirección eliminada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       403:
+ *         description: No tienes permisos para eliminar esta dirección
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Cliente o dirección no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 //delete
 export const deleteAddress = async (req, res) => {
   try {

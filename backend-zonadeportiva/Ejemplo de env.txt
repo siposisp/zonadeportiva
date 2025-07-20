@@ -1,0 +1,53 @@
+####### === Configuración env de ejemplo, no contiene ningún valor real === #######
+
+
+
+# Configuración de base de datos local
+DB_USER=postgres
+DB_HOST=localhost
+DB_DATABASE=zonadeportiva-bd
+DB_PASSWORD=12398456
+DB_PORT=5432
+
+######### Tokens de acceso a Bsale
+# Token de demo
+BSALE_TOKEN_DEMO=4b7505c6c414b7505c6c414b7505c6c414b75000
+#Token de producción
+BSALE_TOKEN_PROD=4b7505c6c414b7505c6c414b7505c6c414b75000
+
+# Token de mi prueba gratuita en Bsale
+BSALE_TOKEN=4b7505c6c414b7505c6c414b750
+
+
+# Configuración de JWT
+JWT_SECRET=1234
+JWT_EXPIRES_IN=24h
+COOKIE_MAX_AGE=43200000
+
+
+# Configuración de Linkify
+LINKIFY_ENDPOINT=https://api.linkify.com/crear-pago
+LINKIFY_MERCHANT=tu_merchant_id
+LINKIFY_BANK=tu_codigo_de_banco
+LINKIFY_TIMEOUT=5000
+
+
+# Tiempo en milisegundos que se esperará antes de revertir el stock
+# 5 minutos (300000 ms)
+REVERT_DELAY_MS=300000
+
+
+# Credenciales de producción de Webpay
+COMMERCE_CODE=982345671234
+API_KEY=f1f7333cf1f7333cf1f7333
+
+
+
+# ============= CONFIGURACIÓN DE CORREO =============
+# Email de quién envía el correo
+EMAIL_USER=correo@email.cl
+EMAIL_PASS=uhjshdfgbsderuhs
+APP_NAME=Zona Deportiva
+
+#Email del administrador de la página web
+EMAIL_ADMIN=correo.admin@email.cl
